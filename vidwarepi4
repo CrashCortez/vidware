@@ -335,9 +335,18 @@ text/plain=leafpad.desktop
 echo "[Desktop Entry]
 Type=Application
 Name=MPV
+Categories=Sound and Video;
 Exec=lxterminal -t mpv_control -e bash -c \"sleep 0.25; xdotool search --name mpv_control windowactivate; mpv %f\"
 NoDisplay=true
 Icon=mpv" > /home/pi/.local/share/applications/mpv.desktop
+
+echo "[Desktop Entry]
+Type=Application
+Name=MPV
+Categories=Sound and Video;
+Exec=lxterminal -t mpv_control -e bash -c \"sleep 0.25; xdotool search --name mpv_control windowactivate; mpv %f\"
+NoDisplay=true
+Icon=mpv" > /usr/share/applications/mpv.desktop
 
 ##### This section "pins" the advanced versions of the programs my script just built. Without doing this, anytime you run a standard system update via "sudo apt-get upgrade" or "sudo apt-get dist-upgrade", the Raspbian package manager might wrongly think the newly-built programs are old and therefore need to be "upgraded". They might then be overwritten with the older, more primitive versions that exist in the Raspbian repository! Pinning them, in effect, says to your system's packager manager: "Don't touch these programs – leave them alone!" As per standard etiquette, I first back up your preferences file – on the remote chance you've been pinning other packages. Hat tip to "rpdom" for his pinning suggestion.
 
