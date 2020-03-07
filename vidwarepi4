@@ -5,78 +5,36 @@
 
 ##### Vidware_Downloads: My script philosophy is to keep things clean and simple. That's why my first step is to create 3 different folders to keep the main elements of my script completely separate from each other. Before anything can be built, we first have to download 6 files in the form of "stable release tarballs". This is the raw source code my script will use to build the 6 programs. We also need 4 GPU-related files from the Raspberry Pi Foundation's official GitHub site that provide OpenGL ES and EGL support (they allow mpv to "talk" to the Raspberry's VideoCore GPU and thus facilitate hardware acceleration). Finally, we need a "waf" file that will allow us to build mpv. All of this will go inside the "Vidware_Downloads" folder – which we're creating with the mkdir command:
 
-
 mkdir Vidware_Downloads
-
-
-
-
-
 
 ##### Vidware_Build: This is the folder where all our "building" will take place – the folder where the raw source code of 6 programs will be compiled and transformed into working software. The "primary" programs are FFmpeg and mpv. But my script also builds a mandatory library called libass – a subtitle renderer that mpv requires. It also builds an advanced H.264 video encoder (x264) and two advanced audio encoders (Fraunhofer AAC and LAME MP3):
 
-
 mkdir Vidware_Build
-
-
-
-
-
 
 ##### Vidware_Packages: This folder will remain empty until the very end of the script. When the script is about 95% complete, all 6 programs will be fully built, installed, and "packaged". These packages are free-standing Debian installers (commonly known as .deb files). What makes these so incredibly useful is that at any time, you can use them to automatically install (or re-install) all the programs on another Raspberry or your existing Raspberry in the future – IN ONLY ONE MINUTE! No scripts or "building" required! My script will conveniently place all of them in the Vidware_Packages folder – so be sure to back them up to a safe place!
 
-
 mkdir Vidware_Packages
-
-
-
-
-
 
 ##### I've discovered an odd quirk about checkinstall: If we don't manually create a standard usr doc path before running it, checkinstall will fail to install some of our programs. This affects the LAME MP3 encoder – but not having the path up to "doc" also affects FFmpeg (even if you don't build or install LAME). This command line takes care of that:
 
 sudo mkdir -p /usr/share/doc/lame
 
-
-
-
-
-
 ##### You'll see a lot of "echo" commands in my script. Why? Because I like VISUAL SEPARATION. A simple echo command inserts a blank line in Terminal's output:
-
 
 echo; echo
 
-
-
-
-
-
 ##### The echo command is also the tool I'm using to "print" information on the Terminal screen – such as letting the user know that we're about to download the tarballs. I also "pipe" the output of echo through the "fold" command with the "-s" option. This ensures my longer sentences are properly "word wrapped" and that my words aren't abruptly cut in half when they hit the edge of your Terminal screen:
-
 
 echo "------------------------------"
 echo "Now downloading the source code tarballs and other essential files for building FFmpeg, mpv, and the 3 advanced encoders. At a connection speed of 1 MB per second, it will take less than 20 seconds." | fold -s
 echo "------------------------------"
 echo
 
-
-
-
-
-
 ##### We're about to download all the files that the script needs. It may look like a lot, but the grand total is less than 18 MB! This is quite impressive when you consider that FFmpeg alone contains more than one MILLION lines of source code! Before we do the downloads, however, we need to change our current working directory to the Vidware_Downloads folder with the cd command:
-
 
 cd /home/pi/Vidware_Downloads
 
-
-
-
-
-
 ##### This is where my script downloads the 11 files it needs. At the time of this writing – August 2018 – all URLs link to the most recent versions available. Be careful if you think you can simply update these links to get even more recent versions in the future! Other parts of my script make specific assumptions about these particular versions. So unless you fully understand all aspects of my script, you definitely don't want to do that!
-
 
 wget -q --show-progress --no-use-server-timestamps https://ffmpeg.org/releases/ffmpeg-4.0.2.tar.bz2
 
@@ -98,15 +56,9 @@ wget -q --show-progress --no-use-server-timestamps https://downloads.sourceforge
 
 #wget -q --show-progress --no-use-server-timestamps https://github.com/raspberrypi/firmware/raw/master/hardfp/opt/vc/lib/pkgconfig/egl.pc
 
-#wget -q --show-progress --no-use-server-timestamps https://waf.io/waf-2.0.9
-
-
-
-
-
+wget -q --show-progress --no-use-server-timestamps https://waf.io/waf-2.0.9
 
 ##### For backup purposes – and for mental clarity – I deliberately decided not to "wget" the files directly into their ultimate destinations. Instead, I wanted all the downloads to first be consolidated into the Vidware_Downloads folder – and then copy them over, later on, into wherever they need to be. So that's what I'm doing here. Sudo is required, by the way, because the opt parent folder (and its children) are owned by user "root", not "pi". If we didn't add the "sudo", we would get a "permission denied" error:
-
 
 #sudo cp libGLESv2.so /opt/vc/lib
 
@@ -116,37 +68,19 @@ wget -q --show-progress --no-use-server-timestamps https://downloads.sourceforge
 
 #sudo cp egl.pc /opt/vc/lib/pkgconfig
 
-
-
-
-
-
 ##### The script downloaded version 2.0.9 of waf (the version that mpv 0.29.0 expects). But mpv also expects the file to simply be named "waf", not "waf-2.0.9". That's why I'm renaming it here with the mv command. Finally, since waf is a Python script that needs to be executed in order to build mpv, I'm using the chmod command to make it executable by the user that owns the file (which in this case is the user named pi):
 
 mv waf-2.0.9 waf
 
 chmod u+x waf
 
-
-
-
-
-
 ##### This makes an exact copy of our 6 source code tarballs (for FFmpeg, mpv, etc.) and places them inside the Vidware_Build folder. Some of the tarballs end in tar.gz, while others end in tar.bz2 – hence the 2 separate lines:
-
 
 cp *.gz /home/pi/Vidware_Build
 
 cp *.bz2 /home/pi/Vidware_Build
 
-
-
-
-
-
-
 ##### We're pretty much all done with the Vidware_Downloads folder at this point – so we now need to make sure the script is performing its actions inside the Vidware_Build folder. That's why we cd into it. We then need to "unzip" the 6 source code tarballs into folders – that's what the 2 "ls" lines with the xargs command does (for technical reasons, you can't use a simple asterisk wildcard to unzip multiple tarballs in the same folder). Finally, I delete all the tarballs in the build folder with the rm command. Why? Because we already have the original copy of them in our Vidware_Downloads folder – so there's no reason to clutter things up with duplicate tarballs!
-
 
 cd /home/pi/Vidware_Build
 
@@ -158,13 +92,7 @@ rm *.gz
 
 rm *.bz2
 
-
-
-
-
-
 ##### I don't want to keep seeing "fdk-aac-0.1.6" as the source code folder name, for example. That's just confusing. Instead, I just want to see "aac" – because that's what it really is. It's the AAC audio encoder! That's why I'm simplifying all the source code folder names by renaming them with the mv command:
-
 
 mv ffmpeg* ffmpeg
 
@@ -178,23 +106,11 @@ mv lame* mp3
 
 mv libass* libass
 
-
-
-
-
-
 ##### We can now copy over the waf file into the mpv source code folder:
-
 
 cp /home/pi/Vidware_Downloads/waf /home/pi/Vidware_Build/mpv
 
-
-
-
-
-
 ##### This is where we install the dependencies we need to build all 6 pieces of software – via "sudo apt-get install". Read my statement in the echo line for more detail:
-
 
 echo; echo
 echo "------------------------------"
@@ -202,15 +118,9 @@ echo "Now downloading and installing the dependencies – essential packages fro
 echo "------------------------------"
 echo
 
-sudo apt-get install -y automake checkinstall libsdl2-dev libva-dev libluajit-5.1-dev libgles2-mesa-dev libtool libvdpau-dev libxcb-shm0-dev texinfo libfontconfig1-dev libfribidi-dev python-docutils libbluray-dev libjpeg-dev libtheora-dev libvorbis-dev libgnutls28-dev linux-headers-rpi2 libomxil-bellagio-dev xdotool libcdio-cdda-dev libcdio-paranoia-dev libdvdread-dev libdvdnav-dev libbluray-dev
-
-
-
-
-
+sudo apt-get install -y automake checkinstall libsdl2-dev libva-dev libluajit-5.1-dev libgles2-mesa-dev libtool libvdpau-dev libxcb-shm0-dev texinfo libfontconfig1-dev libfribidi-dev python-docutils libbluray-dev libjpeg-dev libtheora-dev libvorbis-dev libgnutls28-dev linux-headers-rpi2 libomxil-bellagio-dev xdotool libcdio-cdda-dev libcdio-paranoia-dev libdvdread-dev libdvdnav-dev libbluray-dev checkinstall devscripts libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev libpostproc-dev libswscale-dev libluajit-5.1-dev libasound2-dev libbluray-dev libcdio-cdda-dev libcdio-dev libcdio-paranoia-dev libdvdnav-dev libdvdread-dev libjpeg-dev libjpeg62-turbo-dev libv4l-dev libsdl2-dev
 
 ##### This begins the "software building" phase of my script. We're configuring and compiling the source code for our first program – the advanced x264 video encoder. That's what people mean by "building" a program. In the "./configure" line, we're enabling and disabling various options that will customize the build in the manner necessary for everything to work. We then compile the program with the "make -j4" command – which is quite impressive given that the "j4" means that all 4 cores inside the Raspberry's CPU will be computing simultaneously! For more information on how to use the encoders with FFmpeg, please see my extremely detailed appendices. After the x264 encoder is fully built, I use the checkinstall command to both install the program and "package it up" into the extremely useful .deb installer packages I mentioned earlier. The final line – sudo ldconfig – is essential in making sure the "shared libraries" are properly recognized.
-
 
 echo; echo
 echo "------------------------------"
@@ -228,13 +138,7 @@ sudo checkinstall -y --pkgname x264 --pkgversion 0.155 make install
 
 sudo ldconfig
 
-
-
-
-
-
 ##### We now move on to build and install the Fraunhofer AAC audio encoder. I don't need to say much here because I already described the basic outline of the "building from source code" process in my above comments about the x264 encoder.
-
 
 echo; echo; echo
 echo "------------------------------"
@@ -254,13 +158,7 @@ sudo checkinstall -y --pkgname fdk-aac --pkgversion 0.1.6 make install
 
 sudo ldconfig
 
-
-
-
-
-
 ##### Now we build and install the LAME MP3 audio encoder:
-
 
 echo; echo; echo
 echo "------------------------------"
@@ -277,14 +175,7 @@ make -j4
 sudo checkinstall -y --pkgname mp3lame --pkgversion 3.100 make install
 
 sudo ldconfig
-
-
-
-
-
-
 ##### Now we build and install the libass subtitle renderer (mpv will not work without this software library):
-
 
 echo; echo; echo
 echo "------------------------------"
@@ -302,13 +193,7 @@ sudo checkinstall -y --pkgname libass --pkgversion 0.14.0 make install
 
 sudo ldconfig
 
-
-
-
-
-
 ##### Now we build and install FFmpeg! This is the very powerful media "engine" at the center of everything we're doing. The last 3 "--enable" lines under "./configure" enable FFmpeg to access the 3 advanced encoders – x264, Fraunhofer AAC, and LAME MP3. Compiling a million+ lines of code is INTENSE and could easily overheat your CPU. Your Raspberry must therefore have its own small fan or an external fan blowing on it. Please see the explicit warnings on this subject in my instructions!
-
 
 echo; echo; echo
 echo "------------------------------"
@@ -358,13 +243,7 @@ sudo checkinstall -y --pkgname ffmpeg --pkgversion 4.0.2 make install
 
 sudo ldconfig
 
-
-
-
-
-
 ##### Now we build and install mpv. Unlike the prior builds which were fairly straightforward, I'll add a few extra comments here – because I had to do quite a bit of arcane tweaking to successfully "port" mpv to the Raspberry platform with full GPU-based hardware acceleration.
-
 
 echo; echo; echo
 echo "------------------------------"
@@ -374,14 +253,7 @@ echo
 
 cd /home/pi/Vidware_Build/mpv
 
-
-
-
-
-
-
 ##### The next 3 lines temporarily define the proper paths for 3 "environmental variables". Without these, mpv will not compile on the pi3. pi4 they are not needed.
-
 
 #####export LIBRARY_PATH=/opt/vc/lib
 
@@ -389,13 +261,7 @@ cd /home/pi/Vidware_Build/mpv
 
 #####export CPATH=/opt/vc/include
 
-
-
-
-
-
 ##### This next section is fairly straightforward. This is where we build and install mpv! The only noteworthy point is that instead of using the "make" system to do our building like all the other programs in this script, we're using the "waf" system. That simply reflects the preferences of the mpv developers.
-
 
 ./waf configure --prefix=/usr --enable-rpi --enable-cdda --enable-dvdread --enable-dvdnav --enable-libbluray
 
@@ -417,13 +283,7 @@ sudo checkinstall -y --pkgname mpv --pkgversion 0.32.0 ./waf install
 
 sudo ldconfig
 
-
-
-
-
-
 ##### This is where we create mpv's configuration file that controls how mpv behaves with ALL video and audio. Please see the full version of Appendix 1 for details; also see the testing section for commentary on the "ytdl-format" line. NOTE: The "alsa-buffer-time" completes the fix to the ALSA issue I described earlier. It defines an audio buffer time of 800,000 microseconds (8/10 of a second). Through extensive testing, I found that this was the final step needed to get mpv and ALSA to play nice together.
-
 
 mkdir -p /home/pi/.config/mpv
 
@@ -433,13 +293,7 @@ screenshot-format=png
 ytdl-format=bestvideo[height<=?1080][fps<=?30][vcodec!=?vp9]+bestaudio/best
 --alsa-buffer-time=800000" > /home/pi/.config/mpv/mpv.conf
 
-
-
-
-
-
 ##### I didn't want users of my script to have to go through the 10-step "Open With" process in File Manager – over and over again – to associate every common type of video and audio file with mpv. So to save everyone a lot of time and eliminate this error-prone task, my script does it automatically! The first line demonstrates proper "etiquette" – before it creates the new associations, it first backs up your original mimeapps.list file (just in case you'd like to review or re-add your initial file associations). I then associate the following video and audio file types with mpv: MP4, WebM, MKV, TS, MOV, AVI, WMV, MPG, WAV, MP3, M4A, and FLAC.
-
 
 cp /home/pi/.config/mimeapps.list /home/pi/.config/mimeapps.list_BACKUP &> /dev/null
 
@@ -475,13 +329,7 @@ text/plain=leafpad.desktop
 
 [Removed Associations]" > /home/pi/.config/mimeapps.list
 
-
-
-
-
-
 ##### Raspbian places its overall file association "system" in 2 separate locations. The items above act as a kind of pointer to the item below. The two work hand-in-hand. The following stanza generates a special kind of file known as a "desktop" file that ends with the ".desktop" extension – but also has an "alias" (in this case, "MPV") and an executable line that tells it what to do. My complicated use of bash -c and xdotool is the result of hours of testing – to guarantee that you never lose keyboard control of mpv, due to other windows stealing "focus" from mpv's Terminal window. You see, mpv relies upon an active Terminal window "behind the screen" to detect the keyboard inputs which allow you to control the video or audio being played. Of course, if you actively do things to lose keyboard control – like hitting alt + tab or randomly clicking the screen with your mouse – there's nothing I can do about that!
-
 
 echo "[Desktop Entry]
 Type=Application
@@ -490,13 +338,7 @@ Exec=lxterminal -t mpv_control -e bash -c \"sleep 0.25; xdotool search --name mp
 NoDisplay=true
 Icon=mpv" > /home/pi/.local/share/applications/mpv.desktop
 
-
-
-
-
-
 ##### This section "pins" the advanced versions of the programs my script just built. Without doing this, anytime you run a standard system update via "sudo apt-get upgrade" or "sudo apt-get dist-upgrade", the Raspbian package manager might wrongly think the newly-built programs are old and therefore need to be "upgraded". They might then be overwritten with the older, more primitive versions that exist in the Raspbian repository! Pinning them, in effect, says to your system's packager manager: "Don't touch these programs – leave them alone!" As per standard etiquette, I first back up your preferences file – on the remote chance you've been pinning other packages. Hat tip to "rpdom" for his pinning suggestion.
-
 
 sudo cp /etc/apt/preferences /etc/apt/preferences_BACKUP &> /dev/null
 
@@ -526,13 +368,7 @@ Pin-Priority: 1001" | sudo cp /dev/stdin /etc/apt/preferences
 
 sudo chmod 644 /etc/apt/preferences
 
-
-
-
-
-
 ##### In some ways, this next section just might be the coolest part of the entire script. That's because it takes the TRILLIONS of computations the script just performed – distilled into 6 tiny packages – and neatly places them in the Vidware_Packages folder. They contain everything you need to reconstitute all the programs on any Raspberry 3B or 3B+ IN ONLY 1 MINUTE! So when the script is all done and the demonstration video has played, be sure to back up the 6 .deb files to a safe location.
-
 
 echo; echo; echo
 echo "------------------------------"
@@ -541,11 +377,6 @@ echo "------------------------------"
 echo
 
 find /home/pi/Vidware_Build -name '*.deb' -exec mv -t /home/pi/Vidware_Packages {} +
-
-
-
-
-
 
 ##### This final section does 3 simple things: First, it downloads and installs the latest version of youtube-dl. If you already have it on your system, it will upgrade it (if necessary). If you don't have it, it will make sure you that you do. At that point, youtube-dl will download a very brief 1080p demonstration video from YouTube. And then comes the final act – mpv will play the video several times in a loop! Press q to quit at any time.
 
