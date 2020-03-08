@@ -51,16 +51,6 @@ wget -q --show-progress --no-use-server-timestamps https://downloads.sourceforge
 
 wget -q --show-progress --no-use-server-timestamps https://waf.io/waf-2.0.9
 
-##### For backup purposes – and for mental clarity – I deliberately decided not to "wget" the files directly into their ultimate destinations. Instead, I wanted all the downloads to first be consolidated into the Vidware_Downloads folder – and then copy them over, later on, into wherever they need to be. So that's what I'm doing here. Sudo is required, by the way, because the opt parent folder (and its children) are owned by user "root", not "pi". If we didn't add the "sudo", we would get a "permission denied" error:
-
-#sudo cp libGLESv2.so /opt/vc/lib
-
-#sudo cp libEGL.so /opt/vc/lib
-
-#sudo cp glesv2.pc /opt/vc/lib/pkgconfig
-
-#sudo cp egl.pc /opt/vc/lib/pkgconfig
-
 ##### The script downloaded version 2.0.9 of waf (the version that mpv 0.29.0 expects). But mpv also expects the file to simply be named "waf", not "waf-2.0.9". That's why I'm renaming it here with the mv command. Finally, since waf is a Python script that needs to be executed in order to build mpv, I'm using the chmod command to make it executable by the user that owns the file (which in this case is the user named pi):
 
 mv waf-2.0.9 waf
