@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script Created by RPi_Mike
-# Updated for teh Pi4 by Crash
+# Updated for the Pi4 by Crash
 # https://www.raspberrypi.org/forums/viewtopic.php?t=199775
 # https://www.raspberrypi.org/forums/memberlist.php?mode=viewprofile&u=251829&sid=68bc4a1c1203becbc516ff81985191d6
 
@@ -48,14 +48,6 @@ wget -q --show-progress --no-use-server-timestamps https://download.videolan.org
 wget -q --show-progress --no-use-server-timestamps https://downloads.sourceforge.net/opencore-amr/fdk-aac-0.1.6.tar.gz
 
 wget -q --show-progress --no-use-server-timestamps https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
-
-#wget -q --show-progress --no-use-server-timestamps https://github.com/raspberrypi/firmware/raw/master/hardfp/opt/vc/lib/libGLESv2.so
-
-#wget -q --show-progress --no-use-server-timestamps https://github.com/raspberrypi/firmware/raw/master/hardfp/opt/vc/lib/libEGL.so
-
-#wget -q --show-progress --no-use-server-timestamps https://github.com/raspberrypi/firmware/raw/master/hardfp/opt/vc/lib/pkgconfig/glesv2.pc
-
-#wget -q --show-progress --no-use-server-timestamps https://github.com/raspberrypi/firmware/raw/master/hardfp/opt/vc/lib/pkgconfig/egl.pc
 
 wget -q --show-progress --no-use-server-timestamps https://waf.io/waf-2.0.9
 
@@ -120,7 +112,6 @@ echo "------------------------------"
 echo
 
 
-#sudo apt-get install -y automake checkinstall libsdl2-dev libva-dev libluajit-5.1-dev libgles2-mesa-dev libtool libvdpau-dev libxcb-shm0-dev texinfo libfontconfig1-dev libfribidi-dev python-docutils libbluray-dev libjpeg-dev libtheora-dev libvorbis-dev libgnutls28-dev linux-headers-rpi2 libomxil-bellagio-dev xdotool libcdio-cdda-dev libcdio-paranoia-dev libdvdread-dev libdvdnav-dev libbluray-dev checkinstall devscripts libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev libpostproc-dev libswscale-dev libluajit-5.1-dev libasound2-dev libbluray-dev libcdio-cdda-dev libcdio-dev libcdio-paranoia-dev libdvdnav-dev libdvdread-dev libjpeg-dev libjpeg62-turbo-dev libv4l-dev libsdl2-dev
 sudo apt-get install -y automake checkinstall libva-dev libgles2-mesa-dev libtool libvdpau-dev libxcb-shm0-dev texinfo libfontconfig1-dev libfribidi-dev python-docutils libtheora-dev libvorbis-dev libgnutls28-dev libomxil-bellagio-dev xdotool devscripts libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev libpostproc-dev libswscale-dev libluajit-5.1-dev libasound2-dev libbluray-dev libcdio-cdda-dev libcdio-dev libcdio-paranoia-dev libdvdnav-dev libdvdread-dev libjpeg-dev libjpeg62-turbo-dev libv4l-dev libsdl2-dev
 
 ##### This begins the "software building" phase of my script. We're configuring and compiling the source code for our first program – the advanced x264 video encoder. That's what people mean by "building" a program. In the "./configure" line, we're enabling and disabling various options that will customize the build in the manner necessary for everything to work. We then compile the program with the "make -j4" command – which is quite impressive given that the "j4" means that all 4 cores inside the Raspberry's CPU will be computing simultaneously! For more information on how to use the encoders with FFmpeg, please see my extremely detailed appendices. After the x264 encoder is fully built, I use the checkinstall command to both install the program and "package it up" into the extremely useful .deb installer packages I mentioned earlier. The final line – sudo ldconfig – is essential in making sure the "shared libraries" are properly recognized.
@@ -133,7 +124,7 @@ echo
 
 cd /home/pi/Vidware_Build/x264
 
-./configure --prefix=/usr --enable-shared --disable-opencl --extra-cflags="-march=armv8-a+crc -mfpu=neon-fp-armv8 -mtune=cortex-a72 -mfloat-abi=hard'
+./configure 
 
 make -j4
 
@@ -153,7 +144,7 @@ cd /home/pi/Vidware_Build/aac
 
 ./autogen.sh
 
-./configure --prefix=/usr --enable-shared
+./configure #--prefix=/usr --enable-shared
 
 make -j4
 
@@ -171,7 +162,7 @@ echo
 
 cd /home/pi/Vidware_Build/mp3
 
-./configure --prefix=/usr --enable-shared
+./configure #--prefix=/usr --enable-shared
 
 make -j4
 
@@ -188,7 +179,7 @@ echo
 
 cd /home/pi/Vidware_Build/libass
 
-./configure --prefix=/usr --enable-shared
+./configure 
 
 make -j4
 
@@ -208,22 +199,22 @@ cd /home/pi/Vidware_Build/ffmpeg
 
 ./configure \
 --prefix=/usr \
---enable-gpl \
---enable-nonfree \
---enable-static \
---enable-libtheora \
---enable-libvorbis \
---enable-omx \
---enable-omx-rpi \
+#--enable-gpl \
+#--enable-nonfree \
+#--enable-static \
+#--enable-libtheora \
+#--enable-libvorbis \
+#--enable-omx \
+#--enable-omx-rpi \
 --enable-mmal \
 --enable-libxcb \
 --enable-libfreetype \
 --enable-libass \
---enable-gnutls \
---disable-opencl \
---enable-libcdio \
---enable-libbluray \
---extra-cflags="-march=armv8-a+crc -mfpu=neon-fp-armv8 -mtune=cortex-a72 -mfloat-abi=hard' \
+#--enable-gnutls \
+#--disable-opencl \
+#--enable-libcdio \
+#--enable-libbluray \
+#--extra-cflags="-march=armv8-a+crc -mfpu=neon-fp-armv8 -mtune=cortex-a72 -mfloat-abi=hard' \
 --enable-libx264 \
 --enable-libfdk-aac \
 --enable-libmp3lame
@@ -256,17 +247,9 @@ echo
 
 cd /home/pi/Vidware_Build/mpv
 
-##### The next 3 lines temporarily define the proper paths for 3 "environmental variables". Without these, mpv will not compile on the pi3. pi4 they are not needed.
-
-#####export LIBRARY_PATH=/opt/vc/lib
-
-#####export PKG_CONFIG_PATH=/opt/vc/lib/pkgconfig
-
-#####export CPATH=/opt/vc/include
-
 ##### This next section is fairly straightforward. This is where we build and install mpv! The only noteworthy point is that instead of using the "make" system to do our building like all the other programs in this script, we're using the "waf" system. That simply reflects the preferences of the mpv developers.
 
-./waf configure --prefix=/usr --enable-rpi --enable-cdda --enable-dvdread --enable-dvdnav --enable-libbluray
+sudo ./waf configure 
 
 echo; echo; echo
 echo "------------------------------"
@@ -291,7 +274,6 @@ sudo ldconfig
 mkdir -p /home/pi/.config/mpv
 
 echo "--fullscreen
-rpi-background=yes
 screenshot-format=png
 ytdl-format=bestvideo[height<=?1080][fps<=?30][vcodec!=?vp9]+bestaudio/best
 --alsa-buffer-time=800000" > /home/pi/.config/mpv/mpv.conf
@@ -392,7 +374,9 @@ find /home/pi/Vidware_Build -name '*.deb' -exec mv -t /home/pi/Vidware_Packages 
 
 ##### This final section does 3 simple things: First, it downloads and installs the latest version of youtube-dl. If you already have it on your system, it will upgrade it (if necessary). If you don't have it, it will make sure you that you do. At that point, youtube-dl will download a very brief 1080p demonstration video from YouTube. And then comes the final act – mpv will play the video several times in a loop! Press q to quit at any time.
 
-sudo pip install --upgrade youtube_dl
+sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
+
+sudo chmod a+rx /usr/local/bin/youtube-dl
 
 echo; echo
 
