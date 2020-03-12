@@ -2,6 +2,7 @@
 
 ffmpeg for PI4 [click Here](https://drive.google.com/open?id=1ActDhTeYpAkMx7d2NrDW9yfZEHB5KbI-)
 
+# You need to be on the OpenGL driver
 
 # Dependencies needed
 
