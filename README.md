@@ -13,3 +13,9 @@ Copy and paste the following into your terminal
 ```
 cd && wget https://raw.githubusercontent.com/CrashCortez/vidware/master/vidware && chmod u+x vidware && sudo bash vidware
 ```
+# For Pi4
+----------
+Copy and paste the following into your terminal
+```
+cd && wget https://raw.githubusercontent.com/CrashCortez/vidware/master/vidware4 && chmod u+x vidware4 && sudo bash vidware4
+```
